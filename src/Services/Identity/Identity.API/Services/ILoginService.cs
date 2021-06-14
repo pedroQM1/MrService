@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Authentication;
 
 namespace Identity.API.Services
 {
-    public interface ILoginServices<T>
+    public interface ILoginService<T>
     {
         Task<bool> ValidateCredentials(T user, string password);
 

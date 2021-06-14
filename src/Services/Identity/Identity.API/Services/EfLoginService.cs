@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Identity.API.Services
 {
-    public class EfLoginService : ILoginServices<ApplicationUser>
+    public class EfLoginService : ILoginService<ApplicationUser>
     {   
 
         private UserManager<ApplicationUser> _userManager;
