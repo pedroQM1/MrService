@@ -1,7 +1,6 @@
 using System;
 using System.Reflection;
 using Autofac;
-using Autofac.Extensions.DependencyInjection;
 using HealthChecks.UI.Client;
 using Identity.API.Data;
 using Identity.API.Devspaces;
@@ -34,7 +33,7 @@ namespace Identity.API
         public IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
-        public IServiceProvider ConfigureServices(IServiceCollection services)
+        public void ConfigureServices(IServiceCollection services)
         {   
 
             var connectionString  = Configuration["ConnectionString"];
@@ -42,7 +41,7 @@ namespace Identity.API
             RegisterAppInsights(services);
             services.AddControllersWithViews();
 
-             services.AddDbContext<ApplicationDbContext>(options =>
+            services.AddDbContext<ApplicationDbContext>(options =>
                     options.UseSqlServer(connectionString,
                     sqlServerOptionsAction: sqlOptions =>
                     {
@@ -64,12 +63,14 @@ namespace Identity.API
                 })
                 .PersistKeysToStackExchangeRedis(ConnectionMultiplexer.Connect(Configuration["DPConnectionString"]), "DataProtection-Keys");
             }
+           
             services.AddHealthChecks()
                 .AddCheck("self", () => HealthCheckResult.Healthy())
                 .AddSqlServer(connectionString,
                     name:"IdentityDB-check",
                     tags: new string[] {"IdentityDB"}
                 );
+
 
             services.AddTransient<ILoginService<ApplicationUser>,EfLoginService>();
             services.AddTransient<IRedirectService,RedirectService>();
@@ -112,10 +113,15 @@ namespace Identity.API
             services.AddRazorPages();
 
             
-            var container = new ContainerBuilder();
-            container.Populate(services);
 
-            return new AutofacServiceProvider(container.Build());
+        
+
+
+            
+            // var container = new ContainerBuilder();
+            // container.Populate(services);
+
+            // return new AutofacServiceProvider(container.Build());
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -138,7 +144,7 @@ namespace Identity.API
                 loggerFactory.CreateLogger<Startup>().LogDebug("Using PATH BASE '{pathBase}'", pathBase);
                 app.UsePathBase(pathBase);
             }
-            //app.UseHttpsRedirection();
+
             app.UseStaticFiles();
             app.Use(async (context,next)=>{
 
@@ -147,34 +153,23 @@ namespace Identity.API
             });
             app.UseForwardedHeaders();
             app.UseIdentityServer();
-
-            //app.UseAuthorization();
-
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllerRoute(
-                    name: "default",
-                    pattern: "{controller=Home}/{action=Index}/{id?}");
-            });
-
-
             app.UseCookiePolicy(new CookiePolicyOptions{MinimumSameSitePolicy = Microsoft.AspNetCore.Http.SameSiteMode.Lax});
-            app.UseRouting();
-            app.UseEndpoints(endpoints =>{
-
-                endpoints.MapDefaultControllerRoute();
-                endpoints.MapControllers();
-                endpoints.MapHealthChecks("/hc", new HealthCheckOptions(){
-
-                    Predicate = _ =>true,
-                    ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
-
+            app.UseRouting()
+                 .UseEndpoints(config =>
+                {
+                    
+                    config.MapHealthChecks("/healthz", new HealthCheckOptions
+                    {
+                        Predicate = _ => true,
+                        ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+                    });
+                    config.MapHealthChecks("/liveness", new HealthCheckOptions{
+                        Predicate = r => r.Name.Contains("self")
+                    });
+                    config.MapDefaultControllerRoute();
+                    config.MapControllers();
                 });
-                endpoints.MapHealthChecks("/liveness", new HealthCheckOptions{
-                    Predicate = r => r.Name.Contains("self")
-                });
-            });
-            
+              
 
         }
         private void RegisterAppInsights(IServiceCollection services){
