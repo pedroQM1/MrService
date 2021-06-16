@@ -1,11 +1,10 @@
-using System;
 
-namespace Identity.API.Models
+using IdentityServer4.Models;
+
+namespace  MrService.Services.Identity.Identity.API.Models
 {
-    public class ErrorViewModel
+    public record ErrorViewModel
     {
-        public string RequestId { get; set; }
-
-        public bool ShowRequestId => !string.IsNullOrEmpty(RequestId);
+      public ErrorMessage Error { get; set; }
     }
 }

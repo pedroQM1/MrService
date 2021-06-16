@@ -14,6 +14,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using MrService.Services.Identity.Identity.API.Models.AccountViewModel;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
+using System.Linq;
 
 namespace Identity.API.Controllers{
 
@@ -165,6 +167,51 @@ namespace Identity.API.Controllers{
             var logout = await _interaction.GetLogoutContextAsync(model.LogoutId);
 
             return Redirect(logout?.PostLogoutRedirectUri);
+        }
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult Register(string returnUrl = null)
+        {
+            ViewData["ReturnUrl"] = returnUrl;
+            return View();
+        }
+        [HttpPost]
+        [AllowAnonymous]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Register(RegisterViewModel model,string returnUrl = null){
+            ViewData["ReturnUrl"] = returnUrl;
+            if(ModelState.IsValid){
+                var user  = new ApplicationUser(){
+                    Email = model.Email,
+                    UserName = model.Email,
+                };
+                var result = await _userManager.CreateAsync(user,model.Password);
+                if(result.Errors.Any()){
+                    AddError(result);
+                    return View(model);
+                }
+            }    
+            if(returnUrl != null){
+                if(HttpContext.User.Identity.IsAuthenticated)
+                    return Redirect(returnUrl);
+                else 
+                    if(ModelState.IsValid)
+                        return RedirectToAction("login","account",new {returnUrl = returnUrl});
+                else 
+                    return View(model);
+            }
+            return RedirectToAction("index","home");       
+        }
+        private void AddError(IdentityResult result){
+            foreach (var error in result.Errors)
+            {
+                ModelState.AddModelError(string.Empty,error.Description);
+            }
+        }
+        [HttpGet]
+        public IActionResult Redirecting()
+        {
+            return View();
         }
 
        
