@@ -4,12 +4,7 @@
 @{
     ViewData["Title"] = "Log in";
 }
-<div class="brand-header-block">
-    <ul class="container">
-        <li><a asp-area="" asp-controller="Account" asp-action="Register" asp-route-returnurl="@ViewData["ReturnUrl"]">REGISTER</a></li>
-        <li class="active" style="margin-right: 65px;">LOGIN</li>
-    </ul>
-</div>
+
 <div class="container account-login-container">
     <div class="row">
         <div class="col-md-12">
@@ -41,15 +36,6 @@
                     </div>
                     <p>
                         <a asp-action="Register" asp-route-returnurl="@ViewData["ReturnUrl"]" class="text">Register as a new user?</a>
-                    </p>
-                    <p>
-                        Note that for demo purposes you don't need to register and can login with these credentials:
-                    </p>
-                    <p>
-                        User:     <b>demouser@microsoft.com</b>
-                    </p>
-                    <p>
-                        Password: <b>Pass@word1</b>
                     </p>
                 </form>
             </section>

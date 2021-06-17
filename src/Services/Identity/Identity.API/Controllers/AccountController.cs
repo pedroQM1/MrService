@@ -47,11 +47,11 @@ namespace Identity.API.Controllers{
         [HttpGet]
         public async Task<IActionResult> Login(string returnUrl){
             var context = await _interaction.GetAuthorizationContextAsync(returnUrl);
-            if(context?.IdP == null)
+            if(context?.IdP != null)
                     throw new NotImplementedException("External login is not implemented!");
 
             var vm = await BuildLoginViewModelAsync(returnUrl, context);
-
+            if(String.IsNullOrEmpty(returnUrl)) returnUrl = "/home/index";
             ViewData["ReturnUrl"] = returnUrl;
 
             return View(vm);
