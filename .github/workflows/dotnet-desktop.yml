@@ -12,7 +12,7 @@ jobs:
     steps:
  
     - name: publish
-      run:  echo ${{github.ref_name}} ${{github.workspace}}
+      run:  echo ${{github.workspace}}
           
             
   
