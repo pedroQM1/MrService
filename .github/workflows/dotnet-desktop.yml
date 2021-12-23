@@ -1,0 +1,18 @@
+name: Deploy Prod
+
+on:
+    workflow_dispatch:
+
+
+jobs:
+  deploy:
+
+    runs-on: windows-2016
+
+    steps:
+ 
+    - name: publish
+      run:  echo ${{github.ref_name}}
+          
+            
+  
