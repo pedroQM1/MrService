@@ -12,7 +12,7 @@ jobs:
     steps:
  
     - name: publish
-      run:  echo "Deploying to production server on branch $GITHUB_REF"
+      run:  echo ${{github.ref }}
           
             
   
