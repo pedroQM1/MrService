@@ -5,8 +5,9 @@ on:
 
 
 jobs:
+ 
   deploy:
-
+    if: ${{ github.ref_name == 'master' }}
     runs-on: windows-2016
 
     steps:
